@@ -1,9 +1,11 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+
 const login = async (req, res) => {
+    const { username, password } = req.body;
+
     try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username: username });
+        const user = await User.findOne({ username }).select('+password').lean();
         
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
@@ -16,11 +18,17 @@ const login = async (req, res) => {
 
         req.session.user = {
             _id: user._id,
-            username: user.username
+            username: user.username,
+            avatarColor: user.avatarColor,
+            avatar: user.avatar
         };
         
-        return res.json({ message: 'Login successful' });
+        return res.status(200).json({ 
+            success: true,
+            redirect: '/feed'
+        });
     } catch (err) {
+        console.log('Login error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
