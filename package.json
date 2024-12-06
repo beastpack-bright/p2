@@ -27,7 +27,10 @@
     "start": "node server/app.js",
     "watch": "nodemon server/app.js",
     "build": "webpack",
-    "dev": "webpack --watch"
+    "dev": "webpack --watch",
+    "pretest": "eslint ./server --fix",
+    "test": "echo \"Tests complete\"",
+    "heroku-postbuild": "webpack"
   },
   "keywords": [],
   "author": "",
@@ -39,7 +42,9 @@
     "@babel/preset-react": "^7.25.9",
     "babel-loader": "^9.2.1",
     "css-loader": "^7.1.2",
-    "eslint": "^9.15.0",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.1",
     "nodemon": "^3.1.7",
     "style-loader": "^4.0.0",
     "webpack": "^5.96.1",

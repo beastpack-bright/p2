@@ -12,18 +12,18 @@ const port = process.env.PORT || 3000;
 const app = express();
 
 app.use((req, res, next) => {
-    req.setTimeout(25000);
-    next();
+  req.setTimeout(25000);
+  next();
 });
 
 const redisClient = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379',
-    socket: {
-        tls: process.env.NODE_ENV === 'production',
-        rejectUnauthorized: false,
-        connectTimeout: 20000,
-        keepAlive: 5000
-    }
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: {
+    tls: process.env.NODE_ENV === 'production',
+    rejectUnauthorized: false,
+    connectTimeout: 20000,
+    keepAlive: 5000,
+  },
 });
 
 // Middleware setup
@@ -35,21 +35,21 @@ app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
 // Redis connection and session setup
 redisClient.connect().catch(console.error);
 app.use(session({
-    store: new RedisStore({ client: redisClient }),
-    secret: process.env.SESSION_SECRET || 'default_secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24
-    }
+  store: new RedisStore({ client: redisClient }),
+  secret: process.env.SESSION_SECRET || 'default_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24,
+  },
 }));
 
 // Handlebars setup
 const hbs = create({
-    extname: '.handlebars',
-    defaultLayout: 'main',
+  extname: '.handlebars',
+  defaultLayout: 'main',
 });
 
 app.engine('handlebars', hbs.engine);
@@ -58,13 +58,13 @@ app.set('views', path.join(__dirname, '../views'));
 app.enable('trust proxy');
 
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB:', err));
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => console.error('Could not connect to MongoDB:', err));
 
 // Routes
 app.use('/', routes);
 
 app.listen(port, (err) => {
-    if (err) throw err;
-    console.log(`WolfChat is running on port ${port}`);
+  if (err) throw err;
+  console.log(`WolfChat is running on port ${port}`);
 });
