@@ -8,18 +8,24 @@ const RedisStore = require('connect-redis').default;
 const { createClient } = require('redis');
 require('dotenv').config();
 
-
 const port = process.env.PORT || 3000;
 const app = express();
 
-// Redis client setup
+app.use((req, res, next) => {
+    req.setTimeout(25000);
+    next();
+});
+
 const redisClient = createClient({
     url: process.env.REDIS_URL || 'redis://localhost:6379',
     socket: {
         tls: process.env.NODE_ENV === 'production',
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        connectTimeout: 20000,
+        keepAlive: 5000
     }
 });
+
 // Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
