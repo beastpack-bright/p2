@@ -2,8 +2,7 @@ const requireLogin = (req, res, next) => {
   if (!req.session.user) {
     return res.redirect('/');
   }
-
-  next();
+  return next();
 };
 
 const requireSecure = (req, res, next) => {
@@ -12,8 +11,7 @@ const requireSecure = (req, res, next) => {
       return res.redirect(`https://${req.hostname}${req.url}`);
     }
   }
-
-  next();
+  return next();
 };
 
 module.exports = {
