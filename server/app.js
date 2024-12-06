@@ -14,9 +14,12 @@ const app = express();
 
 // Redis client setup
 const redisClient = createClient({
-    url: process.env.REDIS_URL || 'redis://localhost:6379'
+    url: process.env.REDIS_URL || 'redis://localhost:6379',
+    socket: {
+        tls: process.env.NODE_ENV === 'production',
+        rejectUnauthorized: false
+    }
 });
-
 // Middleware setup
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
