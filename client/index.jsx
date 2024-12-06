@@ -11,6 +11,7 @@ import Settings from './components/Settings';
 import Profile from './components/Profile';
 import { lightTheme, darkTheme, blueTheme, highContrastTheme, beeTheme, pinkTheme } from '../views/layouts/index';
 
+
 const themes = {
     light: lightTheme,
     dark: darkTheme,
@@ -20,18 +21,35 @@ const themes = {
     pink: pinkTheme
 };
 
+
 const App = () => {
-    const [currentTheme, setCurrentTheme] = useState('light');
     const path = window.location.pathname;
     const isAuthPage = path === '/' || path === '/signup' || path === "/404";
 
+    const [currentTheme, setCurrentTheme] = useState(() => {
+        return isAuthPage ? 'light' : (localStorage.getItem('userTheme') || 'light');
+    });
+
     useEffect(() => {
-        fetch('/api/user').then(res => res.json()).then(user => {
-            if (user.theme) {
-                setCurrentTheme(user.theme);
-            }
-        });
-    }, []);
+        if (!isAuthPage) {
+            const fetchUserTheme = async () => {
+                const response = await fetch('/api/user');
+                const data = await response.json();
+                if (data.theme) {
+                    setCurrentTheme(data.theme);
+                    localStorage.setItem('userTheme', data.theme);
+                }
+            };
+            fetchUserTheme();
+        }
+    }, [isAuthPage]);
+
+
+    const handleThemeChange = (newTheme) => {
+        setCurrentTheme(newTheme);
+        localStorage.setItem('userTheme', newTheme);
+    };
+
 
     const getComponent = () => {
         switch (path) {
@@ -42,8 +60,8 @@ const App = () => {
             case '/feed':
                 return <Feed />;
             case '/settings':
-                case '/settings':
-                    return <Settings currentTheme={currentTheme} onThemeChange={setCurrentTheme} />;
+            case '/settings':
+                return <Settings currentTheme={currentTheme} onThemeChange={setCurrentTheme} />;
             case '/404':
                 return <NotFound />;
             default:
@@ -54,19 +72,25 @@ const App = () => {
         }
     };
 
+
     const componentToRender = getComponent();
 
+
     return (
-        <ThemeProvider theme={themes[currentTheme]}>
+        <ThemeProvider theme={themes[isAuthPage ? 'light' : currentTheme]}>
             <CssBaseline />
             {isAuthPage ? componentToRender : (
                 <Layout>
-                    {componentToRender}
+                    {React.cloneElement(componentToRender, {
+                        currentTheme: currentTheme,
+                        onThemeChange: handleThemeChange
+                    })}
                 </Layout>
             )}
         </ThemeProvider>
     );
 };
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const root = createRoot(document.getElementById('root'));
