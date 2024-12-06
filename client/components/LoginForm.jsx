@@ -32,26 +32,30 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://project2-eas2062-c398293e17f7.herokuapp.com/login'
+        : '/login';
+
     try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        window.location.href = '/feed';
-      } else {
-        setShowError(true);
-      }
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            window.location.href = '/feed';
+        } else {
+            setShowError(true);
+        }
     } catch (err) {
-      setShowError(true);
+        setShowError(true);
     }
-  };
+};
 
   return (
     <Container maxWidth="sm">
