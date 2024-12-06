@@ -23,7 +23,7 @@ const requireSecure = (req, res, next) => {
         next();
     } else {
         res.redirect(`https://${req.headers.host}${req.url}`);
-    }
+    } 
 };
 
 // Public pages, no login
