@@ -14,6 +14,17 @@ const requireAuth = (req, res, next) => {
     }
     next();
 };
+const requireSecure = (req, res, next) => {
+    if (process.env.NODE_ENV === 'development') {
+        return next();
+    }
+    
+    if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+        next();
+    } else {
+        res.redirect(`https://${req.headers.host}${req.url}`);
+    }
+};
 
 // Public pages, no login
 router.get('/', (req, res) => {
@@ -37,7 +48,7 @@ router.get('/howls', requireAuth, (req, res) => {
     res.render('howls');
 });
 
-router.get('/settings', requireAuth, (req, res) => {
+router.get('/settings', requireSecure, requireAuth, (req, res) => {
     res.render('settings');
 });
 
@@ -124,13 +135,18 @@ router.post('/api/howls/:howlId/replies', async (req, res) => {
     }
 });
 router.get('/api/user', (req, res) => {
-    if (req.session.user) {
-        res.json(req.session.user);
-    } else {
-        res.status(401).json({ error: 'Not logged in' });
+    if (!req.session.user) {
+        return res.json({ 
+            isLoggedIn: false,
+            user: null 
+        });
     }
+    res.json({
+        isLoggedIn: true,
+        user: req.session.user
+    });
 });
-router.post('/api/settings/avatar-color', async (req, res) => {
+router.post('/api/settings/avatar-color', requireSecure, async (req, res) => {
     try {
         const user = await User.findById(req.session.user._id);
         user.avatarColor = req.body.color;
@@ -213,7 +229,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post('/api/settings/avatar', upload.single('avatar'), async (req, res) => {
+router.post('/api/settings/avatar', requireSecure, upload.single('avatar'), async (req, res) => {
     try {
         const user = await User.findById(req.session.user._id);
         user.avatar = `/uploads/${req.file.filename}`;
@@ -231,7 +247,7 @@ router.post('/api/settings/avatar', upload.single('avatar'), async (req, res) =>
     }
 });
 //Password change 
-router.post('/api/settings/change-password', async (req, res) => {
+router.post('/api/settings/change-password', requireSecure, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     try {
@@ -370,9 +386,9 @@ router.post('/api/notifications/read', requireAuth, async (req, res) => {
 });
 
 // auth auth auth aith auth
-router.post('/login', auth.login);
-router.post('/signup', auth.signup);
-router.post('/logout', (req, res) => {
+router.post('/login', requireSecure, auth.login);
+router.post('/signup', requireSecure, auth.signup);
+router.post('/logout', requireSecure, (req, res) => {
     req.session.destroy();
     res.json({ message: 'Logged out successfully' });
 });

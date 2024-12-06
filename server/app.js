@@ -8,6 +8,7 @@ const RedisStore = require('connect-redis').default;
 const { createClient } = require('redis');
 require('dotenv').config();
 
+
 const port = process.env.PORT || 3000;
 const app = express();
 
@@ -45,7 +46,7 @@ const hbs = create({
 app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 app.set('views', path.join(__dirname, '../views'));
-
+app.enable('trust proxy');
 
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('Connected to MongoDB'))
