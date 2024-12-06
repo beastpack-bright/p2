@@ -3,10 +3,11 @@ const path = require('path');
 const mongoose = require('mongoose');
 const { create } = require('express-handlebars');
 const session = require('express-session');
-const routes = require('./routes');
+
 const RedisStore = require('connect-redis').default;
 const { createClient } = require('redis');
 require('dotenv').config();
+const routes = require('./routes');
 
 const port = process.env.PORT || 3000;
 const app = express();
