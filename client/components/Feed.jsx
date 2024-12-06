@@ -35,10 +35,12 @@ const Feed = () => {
             const response = await fetch('/api/user');
             if (response.ok) {
                 const data = await response.json();
-                setCurrentUser({
-                    ...data,
-                    featuredHowl: data.featuredHowl
-                });
+                if (data.isLoggedIn) {  
+                    setCurrentUser({
+                        ...data.user,  
+                        featuredHowl: data.user.featuredHowl
+                    });
+                }
             }
         };
         fetchUser();

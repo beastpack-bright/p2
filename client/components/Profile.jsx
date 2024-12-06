@@ -27,12 +27,14 @@ const Profile = () => {
                     setProfile(profileData);
                     setBlurb(profileData.blurb || '');
                 }
-
-                // Check current user
+    
+                // Check current user - Updated this part
                 const currentUserResponse = await fetch('/api/user');
                 if (currentUserResponse.ok) {
-                    const currentUser = await currentUserResponse.json();
-                    setIsCurrentUserProfile(currentUser.username === username);
+                    const userData = await currentUserResponse.json();
+                    if (userData.isLoggedIn) {
+                        setIsCurrentUserProfile(userData.user.username === username);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching profile:', error);
