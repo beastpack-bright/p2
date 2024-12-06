@@ -386,7 +386,12 @@ router.post('/api/notifications/read', requireAuth, async (req, res) => {
 });
 
 // auth auth auth aith auth
-router.post('/login', requireSecure, auth.login);
+router.post('/login', requireSecure, (req, res, next) => {
+    if (process.env.NODE_ENV === 'production') {
+        req.headers['x-forwarded-proto'] = 'https';
+    }
+    auth.login(req, res, next);
+});
 router.post('/signup', requireSecure, auth.signup);
 router.post('/logout', requireSecure, (req, res) => {
     req.session.destroy();
