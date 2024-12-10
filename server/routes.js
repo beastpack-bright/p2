@@ -384,18 +384,18 @@ router.get('/api/howls/following', async (req, res) => {
     }
 
     const howls = await Howl.find({
-      author: { $in: req.session.user.following || [] }
+      author: { $in: req.session.user.following || [] },
     })
       .populate('author')
       .populate({
         path: 'replies',
-        populate: { path: 'author' }
+        populate: { path: 'author' },
       })
       .sort({ createdAt: -1 });
 
-    res.json(howls);
+    return res.json(howls);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 router.post('/api/users/:userId/follow', async (req, res) => {
