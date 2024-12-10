@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    Container, Paper, Typography, Box, Avatar, Grid, Card, CardContent, Tooltip, Button, TextField 
+import {
+    Container, Paper, Typography, Box, Avatar, Grid, Card, CardContent, Tooltip, Button, TextField
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import GroupIcon from '@mui/icons-material/Group';
@@ -9,30 +9,32 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import WhatshotIcon from '@mui/icons-material/Whatshot';
 import PetsIcon from '@mui/icons-material/Pets';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [blurb, setBlurb] = useState('');
     const [isCurrentUserProfile, setIsCurrentUserProfile] = useState(false);
+    const [currentUser, setCurrentUser] = useState(null);
 
     useEffect(() => {
         const username = window.location.pathname.split('/profile/')[1];
         const fetchProfile = async () => {
             try {
-                // Fetch profile data
                 const profileResponse = await fetch(`/api/profile/${username}`);
                 if (profileResponse.ok) {
                     const profileData = await profileResponse.json();
                     setProfile(profileData);
                     setBlurb(profileData.blurb || '');
                 }
-    
-                // Check current user - Updated this part
+
                 const currentUserResponse = await fetch('/api/user');
                 if (currentUserResponse.ok) {
                     const userData = await currentUserResponse.json();
                     if (userData.isLoggedIn) {
+                        setCurrentUser(userData.user);
                         setIsCurrentUserProfile(userData.user.username === username);
                     }
                 }
@@ -42,6 +44,31 @@ const Profile = () => {
         };
         fetchProfile();
     }, []);
+    const fetchUser = async () => {
+        const response = await fetch('/api/user');
+        const data = await response.json();
+        if (data.isLoggedIn) {
+            setCurrentUser(data.user);
+        }
+    };
+    const handleFollow = async (userId) => {
+        const response = await fetch(`/api/users/${userId}/follow`, {
+            method: 'POST'
+        });
+        if (response.ok) {
+            fetchUser();
+        }
+    };
+
+    const handleUnfollow = async (userId) => {
+        const response = await fetch(`/api/users/${userId}/unfollow`, {
+            method: 'POST'
+        });
+        if (response.ok) {
+            fetchUser();
+        }
+    };
+
 
     const handleSaveBlurb = async () => {
         try {
@@ -53,13 +80,12 @@ const Profile = () => {
 
             if (response.ok) {
                 window.location.reload();
-            } else {
-                console.error('Failed to save blurb');
             }
         } catch (error) {
             console.error('Error saving blurb:', error);
         }
     };
+
     if (!profile) return <div>Loading...</div>;
 
     return (
@@ -82,7 +108,28 @@ const Profile = () => {
                         <Typography variant="body1" color="textSecondary">
                             Howls: {profile.howlCount}
                         </Typography>
+                        {!isCurrentUserProfile && currentUser && (
+    <Button
+        variant="contained"
+        startIcon={currentUser.following?.includes(profile._id) ? <PersonRemoveIcon /> : <PersonAddIcon />}
+        onClick={() =>
+            currentUser.following?.includes(profile._id)
+                ? handleUnfollow(profile._id)
+                : handleFollow(profile._id)
+        }
+        sx={{
+            mt: 1,
+            backgroundColor: currentUser.following?.includes(profile._id) ? '#ff4444' : '#4a4a4a',
+            '&:hover': {
+                backgroundColor: currentUser.following?.includes(profile._id) ? '#cc0000' : '#2a2a2a'
+            }
+        }}
+    >
+        {currentUser.following?.includes(profile._id) ? 'Unfollow' : 'Follow'}
+    </Button>
+)}
                         <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                            { }
                             {profile.howlCount >= 5 && (
                                 <Tooltip title="Vocal Wolf: Posted 5+ Howls">
                                     <ChatBubbleIcon sx={{ color: '#FFD700' }} />
@@ -131,7 +178,7 @@ const Profile = () => {
                             value={blurb}
                             onChange={(e) => setBlurb(e.target.value)}
                         />
-                        <Button 
+                        <Button
                             onClick={handleSaveBlurb}
                             sx={{ mt: 2 }}
                         >
@@ -140,25 +187,25 @@ const Profile = () => {
                     </Box>
                 ) : (
                     <Box>
-                    <Typography variant="body1">
-                        {profile.blurb || "No bio yet"}
-                    </Typography>
-                    {isCurrentUserProfile && (
-                        <Button 
-                            onClick={() => setIsEditing(true)}
-                            sx={{ mt: 2 }}
-                        >
-                            Edit Blurb
-                        </Button>
-                    )}
-                </Box>
+                        <Typography variant="body1">
+                            {profile.blurb || "No bio yet"}
+                        </Typography>
+                        {isCurrentUserProfile && (
+                            <Button
+                                onClick={() => setIsEditing(true)}
+                                sx={{ mt: 2 }}
+                            >
+                                Edit Blurb
+                            </Button>
+                        )}
+                    </Box>
                 )}
 
                 <Grid container spacing={2} sx={{ mt: 3 }}>
                     <Grid item xs={12}>
                         <Typography variant="h6" sx={{ mb: 2 }}>Pack Stats</Typography>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Card>
                             <CardContent>
                                 <Typography color="textSecondary" gutterBottom>
@@ -170,7 +217,7 @@ const Profile = () => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Card>
                             <CardContent>
                                 <Typography color="textSecondary" gutterBottom>
@@ -182,7 +229,7 @@ const Profile = () => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={4}>
+                    <Grid item xs={3}>
                         <Card>
                             <CardContent>
                                 <Typography color="textSecondary" gutterBottom>
@@ -190,6 +237,18 @@ const Profile = () => {
                                 </Typography>
                                 <Typography variant="h4">
                                     {profile.packStats.repliesMade}
+                                </Typography>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <Card>
+                            <CardContent>
+                                <Typography color="textSecondary" gutterBottom>
+                                    Following
+                                </Typography>
+                                <Typography variant="h4">
+                                    {profile.following?.length || 0}
                                 </Typography>
                             </CardContent>
                         </Card>

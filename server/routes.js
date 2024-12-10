@@ -270,11 +270,11 @@ router.get('/api/profile/:username?', async (req, res) => {
       .sort({ createdAt: -1 })
       .limit(5)
       .populate('author', 'username avatar avatarColor');
-    // New stats calculations
+    // New stats
     const userHowls = await Howl.find({ author: user._id });
     const repliesReceived = userHowls.reduce((total, howl) => total + howl.replies.length, 0);
 
-    // Get total replies made by user
+    // Get total replies
     const allHowls = await Howl.find({});
     const repliesMade = allHowls.reduce((total, howl) => {
       const userReplies = howl.replies.filter(
@@ -284,6 +284,7 @@ router.get('/api/profile/:username?', async (req, res) => {
     }, 0);
 
     res.json({
+      _id: user._id,
       username: user.username,
       avatar: user.avatar,
       avatarColor: user.avatarColor,
@@ -375,6 +376,65 @@ router.post('/api/notifications/read', requireAuth, async (req, res) => {
   }
 });
 
+// Following routes
+router.get('/api/howls/following', async (req, res) => {
+  try {
+    if (!req.session.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const howls = await Howl.find({
+      author: { $in: req.session.user.following || [] }
+    })
+      .populate('author')
+      .populate({
+        path: 'replies',
+        populate: { path: 'author' }
+      })
+      .sort({ createdAt: -1 });
+
+    res.json(howls);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+router.post('/api/users/:userId/follow', async (req, res) => {
+  try {
+    const userToFollow = await User.findById(req.params.userId);
+    const currentUser = await User.findById(req.session.user._id);
+
+    if (!userToFollow) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    if (!currentUser.following.includes(req.params.userId)) {
+      currentUser.following.push(req.params.userId);
+      await currentUser.save();
+      req.session.user = currentUser;
+    }
+
+    return res.json({ message: 'Successfully followed user' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to follow user' });
+  }
+});
+
+router.post('/api/users/:userId/unfollow', async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.session.user._id);
+
+    currentUser.following = currentUser.following.filter(
+      (id) => id.toString() !== req.params.userId,
+    );
+
+    await currentUser.save();
+    req.session.user = currentUser;
+
+    return res.json({ message: 'Successfully unfollowed user' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to unfollow user' });
+  }
+});
 // auth auth auth aith auth
 router.post('/login', requireSecure, auth.login);
 router.post('/signup', requireSecure, auth.signup);

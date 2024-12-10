@@ -34,6 +34,14 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: 'light',
   },
+  following: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
+  followers: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
 });
 
 UserSchema.pre('save', async function preSave(next) {
