@@ -57,6 +57,13 @@ const Profile = () => {
         });
         if (response.ok) {
             fetchUser();
+            // Refresh profile data to update following count
+            const username = window.location.pathname.split('/profile/')[1];
+            const profileResponse = await fetch(`/api/profile/${username}`);
+            if (profileResponse.ok) {
+                const profileData = await profileResponse.json();
+                setProfile(profileData);
+            }
         }
     };
 
@@ -66,9 +73,15 @@ const Profile = () => {
         });
         if (response.ok) {
             fetchUser();
+            // Refresh profile data to update following count
+            const username = window.location.pathname.split('/profile/')[1];
+            const profileResponse = await fetch(`/api/profile/${username}`);
+            if (profileResponse.ok) {
+                const profileData = await profileResponse.json();
+                setProfile(profileData);
+            }
         }
     };
-
 
     const handleSaveBlurb = async () => {
         try {

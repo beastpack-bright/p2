@@ -11,7 +11,13 @@ const routes = require('./routes');
 const port = process.env.PORT || 3000;
 
 const redisClient = createClient({
-  url: process.env.REDISCLOUD_URL,
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: {
+    tls: process.env.NODE_ENV === 'production',
+    rejectUnauthorized: false,
+    connectTimeout: 20000,
+    keepAlive: 5000,
+  },
 });
 
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
