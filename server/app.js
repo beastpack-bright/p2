@@ -11,12 +11,6 @@ const routes = require('./routes');
 
 const port = process.env.PORT || 3000;
 const app = express();
-
-app.use((req, res, next) => {
-  req.setTimeout(25000);
-  next();
-});
-
 const redisClient = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
   socket: {
@@ -25,6 +19,24 @@ const redisClient = createClient({
     connectTimeout: 20000,
     keepAlive: 5000,
   },
+});
+const checkConnections = async () => {
+  const redisStatus = await redisClient.ping();
+  const mongoStatus = mongoose.connection.readyState;
+  return redisStatus === 'PONG' && mongoStatus === 1;
+};
+
+app.use(async (req, res, next) => {
+  const isConnected = await checkConnections();
+  if (!isConnected) {
+    return res.status(503).json({ error: 'Database connection not ready' });
+  }
+  return next();
+});
+
+app.use((req, res, next) => {
+  req.setTimeout(25000);
+  next();
 });
 
 // Middleware setup
