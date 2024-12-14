@@ -3,81 +3,65 @@ const path = require('path');
 const mongoose = require('mongoose');
 const { create } = require('express-handlebars');
 const session = require('express-session');
-
 const RedisStore = require('connect-redis').default;
 const { createClient } = require('redis');
 require('dotenv').config();
 const routes = require('./routes');
 
 const port = process.env.PORT || 3000;
-const app = express();
+
 const redisClient = createClient({
-  url: process.env.REDIS_URL,
-  socket: {
-    tls: true,
-    rejectUnauthorized: false,
-    connectTimeout: 20000,
-    keepAlive: 5000,
-  },
-});
-const checkConnections = async () => {
-  const redisStatus = await redisClient.ping();
-  const mongoStatus = mongoose.connection.readyState;
-  return redisStatus === 'PONG' && mongoStatus === 1;
-};
-
-app.use(async (req, res, next) => {
-  const isConnected = await checkConnections();
-  if (!isConnected) {
-    return res.status(503).json({ error: 'Database connection not ready' });
-  }
-  return next();
+  url: process.env.REDISCLOUD_URL,
 });
 
-app.use((req, res, next) => {
-  req.setTimeout(25000);
-  next();
-});
+redisClient.on('error', (err) => console.log('Redis Client Error', err));
 
-// Middleware setup
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
+redisClient.connect().then(() => {
+  const app = express();
 
-// Redis connection and session setup
-redisClient.connect().catch(console.error);
-app.use(session({
-  store: new RedisStore({ client: redisClient }),
-  secret: process.env.SESSION_SECRET || 'default_secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    maxAge: 1000 * 60 * 60 * 24,
-  },
-}));
+  // Middleware setup
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.static('public'));
+  app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted/`)));
 
-// Handlebars setup
-const hbs = create({
-  extname: '.handlebars',
-  defaultLayout: 'main',
-});
+  // Session setup
+  app.use(session({
+    key: 'sessionid',
+    store: new RedisStore({
+      client: redisClient,
+    }),
+    secret: process.env.SESSION_SECRET || 'default_secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24,
+    },
+  }));
 
-app.engine('handlebars', hbs.engine);
-app.set('view engine', 'handlebars');
-app.set('views', path.join(__dirname, '../views'));
-app.enable('trust proxy');
+  // Handlebars setup
+  const hbs = create({
+    extname: '.handlebars',
+    defaultLayout: 'main',
+  });
 
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('Could not connect to MongoDB:', err));
+  app.engine('handlebars', hbs.engine);
+  app.set('view engine', 'handlebars');
+  app.set('views', path.join(__dirname, '../views'));
+  app.enable('trust proxy');
 
-// Routes
-app.use('/', routes);
+  // MongoDB connection
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((err) => console.error('Could not connect to MongoDB:', err));
 
-app.listen(port, (err) => {
-  if (err) throw err;
-  console.log(`WolfChat is running on port ${port}`);
+  // Routes
+  app.use('/', routes);
+
+  app.listen(port, (err) => {
+    if (err) throw err;
+    console.log(`WolfChat is running on port ${port}`);
+  });
 });
