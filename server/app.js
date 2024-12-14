@@ -15,7 +15,7 @@ const redisClient = createClient({
   socket: {
     tls: process.env.NODE_ENV === 'production',
     rejectUnauthorized: false,
-  }
+  },
 });
 redisClient.on('error', (err) => console.log('Redis Client Error', err));
 

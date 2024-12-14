@@ -13,7 +13,7 @@ import { Wheel } from '@uiw/react-color';
 import { TextField } from '@mui/material';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 
-const Settings = ({ currentTheme, onThemeChange  }) => {
+const Settings = ({ currentTheme, onThemeChange }) => {
     const [theme, setTheme] = useState(currentTheme);
     const [avatar, setAvatar] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
@@ -23,7 +23,7 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordError, setPasswordError] = useState('');
-    
+
     const themes = [
         { value: 'light', label: 'Light Theme' },
         { value: 'dark', label: 'Dark Theme' },
@@ -84,7 +84,7 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
         const newTheme = event.target.value;
         setTheme(newTheme);
         onThemeChange(newTheme);
-        
+
         fetch('/api/settings/theme', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -156,14 +156,14 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
                                     Avatar Background Color
                                 </Typography>
                                 <Avatar
-    sx={{
-        width: 100,
-        height: 100,
-        mb: 2,
-        bgcolor: backgroundColor || '#4a4a4a',
-        margin: '0 auto'
-    }}
-/>
+                                    sx={{
+                                        width: 100,
+                                        height: 100,
+                                        mb: 2,
+                                        bgcolor: backgroundColor || '#4a4a4a',
+                                        margin: '0 auto'
+                                    }}
+                                />
                                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                     <Wheel
                                         color={backgroundColor}
@@ -177,19 +177,19 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
                             <Divider sx={{ width: '100%', my: 4 }} />
 
                             <Box sx={{ textAlign: 'center', width: '100%' }}>
-                            <Typography variant="h6" gutterBottom>
-    Custom Avatar Image
-</Typography>
-<Avatar
-    src={previewUrl || currentAvatar}
-    sx={{
-        width: 100,
-        height: 100,
-        mb: 2,
-        bgcolor: backgroundColor || '#4a4a4a',
-        margin: '0 auto'
-    }}
-/>
+                                <Typography variant="h6" gutterBottom>
+                                    Custom Avatar Image
+                                </Typography>
+                                <Avatar
+                                    src={previewUrl || currentAvatar}
+                                    sx={{
+                                        width: 100,
+                                        height: 100,
+                                        mb: 2,
+                                        bgcolor: backgroundColor || '#4a4a4a',
+                                        margin: '0 auto'
+                                    }}
+                                />
                                 <input
                                     accept="image/*"
                                     style={{ display: 'none' }}
@@ -246,26 +246,26 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
                                 </Button>
                                 <Divider sx={{ width: '100%', my: 4 }} />
                                 <Box sx={{ textAlign: 'center', width: '100%' }}>
-    <Typography variant="h6" gutterBottom>
-        Theme
-    </Typography>
-    <FormControl fullWidth sx={{ mt: 2 }}>
-        <InputLabel>Theme</InputLabel>
-        <Select
-            value={theme}
-            onChange={handleThemeChange}
-            label="Theme"
-        >
-            {themes.map((theme) => (
-                <MenuItem key={theme.value} value={theme.value}>
-                    {theme.label}
-                </MenuItem>
-            ))}
-        </Select>
-    </FormControl>
-</Box>
+                                    <Typography variant="h6" gutterBottom>
+                                        Theme
+                                    </Typography>
+                                    <FormControl fullWidth sx={{ mt: 2 }}>
+                                        <InputLabel>Theme</InputLabel>
+                                        <Select
+                                            value={theme}
+                                            onChange={handleThemeChange}
+                                            label="Theme"
+                                        >
+                                            {themes.map((theme) => (
+                                                <MenuItem key={theme.value} value={theme.value}>
+                                                    {theme.label}
+                                                </MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                </Box>
 
-<Divider sx={{ width: '100%', my: 4 }} />
+                                <Divider sx={{ width: '100%', my: 4 }} />
                                 <Box sx={{ textAlign: 'center', width: '100%' }}>
                                     <Typography variant="h6" gutterBottom>
                                         Change Password
@@ -313,7 +313,7 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
                                     >
                                         Change Password
                                     </Button>
-                                   
+
                                 </Box>
                             </Box>
                         </Box>

@@ -294,7 +294,7 @@ router.get('/api/profile/:username?', async (req, res) => {
         repliesReceived,
         repliesMade,
         totalInteractions: repliesReceived + repliesMade + howlCount,
-        following: user.following.length
+        following: user.following.length,
       },
       joinDate: user.createdAt,
       recentHowls,
