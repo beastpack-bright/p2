@@ -12,9 +12,9 @@ const routes = require('./routes');
 const port = process.env.PORT || 3000;
 const app = express();
 const redisClient = createClient({
-  url: process.env.REDIS_URL || 'redis://localhost:6379',
+  url: process.env.REDIS_URL,
   socket: {
-    tls: process.env.NODE_ENV === 'production',
+    tls: true,
     rejectUnauthorized: false,
     connectTimeout: 20000,
     keepAlive: 5000,
