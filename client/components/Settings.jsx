@@ -68,10 +68,13 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
         const fetchUser = async () => {
             const response = await fetch('/api/user');
             if (response.ok) {
-                const user = await response.json();
-                setCurrentAvatar(user.avatar);
-                setPreviewUrl(user.avatar);
-                setBackgroundColor(user.avatarColor || '#4a4a4a');
+                const data = await response.json();
+                if (data.isLoggedIn) {
+                    const user = data.user;
+                    setCurrentAvatar(user.avatar);
+                    setPreviewUrl(user.avatar);
+                    setBackgroundColor(user.avatarColor);
+                }
             }
         };
         fetchUser();
@@ -153,14 +156,14 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
                                     Avatar Background Color
                                 </Typography>
                                 <Avatar
-                                    sx={{
-                                        width: 100,
-                                        height: 100,
-                                        mb: 2,
-                                        bgcolor: backgroundColor,
-                                        margin: '0 auto'
-                                    }}
-                                />
+    sx={{
+        width: 100,
+        height: 100,
+        mb: 2,
+        bgcolor: backgroundColor || '#4a4a4a',
+        margin: '0 auto'
+    }}
+/>
                                 <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                                     <Wheel
                                         color={backgroundColor}
@@ -174,19 +177,19 @@ const Settings = ({ currentTheme, onThemeChange  }) => {
                             <Divider sx={{ width: '100%', my: 4 }} />
 
                             <Box sx={{ textAlign: 'center', width: '100%' }}>
-                                <Typography variant="h6" gutterBottom>
-                                    Custom Avatar Image
-                                </Typography>
-                                <Avatar
-                                    src={previewUrl}
-                                    sx={{
-                                        width: 100,
-                                        height: 100,
-                                        mb: 2,
-                                        bgcolor: backgroundColor,
-                                        margin: '0 auto'
-                                    }}
-                                />
+                            <Typography variant="h6" gutterBottom>
+    Custom Avatar Image
+</Typography>
+<Avatar
+    src={previewUrl || currentAvatar}
+    sx={{
+        width: 100,
+        height: 100,
+        mb: 2,
+        bgcolor: backgroundColor || '#4a4a4a',
+        margin: '0 auto'
+    }}
+/>
                                 <input
                                     accept="image/*"
                                     style={{ display: 'none' }}

@@ -26,7 +26,10 @@ const Profile = () => {
                 const profileResponse = await fetch(`/api/profile/${username}`);
                 if (profileResponse.ok) {
                     const profileData = await profileResponse.json();
-                    setProfile(profileData);
+                   setProfile({
+                        ...profileData,
+                        following: profileData.following || []
+                    });
                     setBlurb(profileData.blurb || '');
                 }
 
@@ -57,6 +60,11 @@ const Profile = () => {
         });
         if (response.ok) {
             fetchUser();
+
+            setProfile(prevProfile => ({
+                ...prevProfile,
+                following: [...(prevProfile.following || []), userId]
+            }));
         }
     };
 
@@ -66,9 +74,13 @@ const Profile = () => {
         });
         if (response.ok) {
             fetchUser();
+
+            setProfile(prevProfile => ({
+                ...prevProfile,
+                following: prevProfile.following.filter(id => id !== userId)
+            }));
         }
     };
-
 
     const handleSaveBlurb = async () => {
         try {
@@ -109,25 +121,25 @@ const Profile = () => {
                             Howls: {profile.howlCount}
                         </Typography>
                         {!isCurrentUserProfile && currentUser && (
-    <Button
-        variant="contained"
-        startIcon={currentUser.following?.includes(profile._id) ? <PersonRemoveIcon /> : <PersonAddIcon />}
-        onClick={() =>
-            currentUser.following?.includes(profile._id)
-                ? handleUnfollow(profile._id)
-                : handleFollow(profile._id)
-        }
-        sx={{
-            mt: 1,
-            backgroundColor: currentUser.following?.includes(profile._id) ? '#ff4444' : '#4a4a4a',
-            '&:hover': {
-                backgroundColor: currentUser.following?.includes(profile._id) ? '#cc0000' : '#2a2a2a'
-            }
-        }}
-    >
-        {currentUser.following?.includes(profile._id) ? 'Unfollow' : 'Follow'}
-    </Button>
-)}
+                            <Button
+                                variant="contained"
+                                startIcon={currentUser.following?.includes(profile._id) ? <PersonRemoveIcon /> : <PersonAddIcon />}
+                                onClick={() =>
+                                    currentUser.following?.includes(profile._id)
+                                        ? handleUnfollow(profile._id)
+                                        : handleFollow(profile._id)
+                                }
+                                sx={{
+                                    mt: 1,
+                                    backgroundColor: currentUser.following?.includes(profile._id) ? '#ff4444' : '#4a4a4a',
+                                    '&:hover': {
+                                        backgroundColor: currentUser.following?.includes(profile._id) ? '#cc0000' : '#2a2a2a'
+                                    }
+                                }}
+                            >
+                                {currentUser.following?.includes(profile._id) ? 'Unfollow' : 'Follow'}
+                            </Button>
+                        )}
                         <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                             { }
                             {profile.howlCount >= 5 && (
@@ -248,7 +260,7 @@ const Profile = () => {
                                     Following
                                 </Typography>
                                 <Typography variant="h4">
-                                    {profile.following?.length || 0}
+                                    {profile.packStats.following || 0}
                                 </Typography>
                             </CardContent>
                         </Card>
