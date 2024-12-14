@@ -443,7 +443,7 @@ router.post('/logout', requireSecure, (req, res) => {
   res.json({ message: 'Logged out successfully' });
 });
 
-// attempt at catch-all
+// 404
 router.get('*', (req, res) => {
   res.redirect('/404');
 });

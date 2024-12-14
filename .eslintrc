@@ -1,11 +1,18 @@
 {
-  "extends": "airbnb/base",
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "airbnb/base"
+  ],
   "rules": {
     "no-underscore-dangle": "off",
     "no-plusplus": "off",
     "import/extensions": "off"
+  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true,
+      "ecmaVersion": 2020
+    }
   }
-  
-  
 }
-
